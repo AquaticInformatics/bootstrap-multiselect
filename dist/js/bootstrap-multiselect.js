@@ -454,7 +454,7 @@
             }, this));
 
             // Bind the change event on the dropdown elements.
-            $('li input', this.$ul).on('change', $.proxy(function(event) {
+            $('li input:not(.multiselect-search)', this.$ul).on('change', $.proxy(function(event) {
                 var $target = $(event.target);
 
                 var checked = $target.prop('checked') || false;
@@ -1229,6 +1229,57 @@
             });
             
             this.rebuild();
+        },
+
+        dataproviderOnlyReplaceOptions: function(dataprovider) {
+            var groupCounter = 0;
+            var $select = this.$select.empty();
+
+            $.each(dataprovider, function (index, option) {
+                var $tag;
+
+                if ($.isArray(option.children)) { // create optiongroup tag
+                    groupCounter++;
+
+                    $tag = $('<optgroup/>').attr({
+                        label: option.label || 'Group ' + groupCounter,
+                        disabled: !!option.disabled
+                    });
+
+                    forEach(option.children, function(subOption) { // add children option tags
+                        $tag.append($('<option/>').attr({
+                            value: subOption.value,
+                            label: subOption.label || subOption.value,
+                            title: subOption.title,
+                            selected: !!subOption.selected,
+                            disabled: !!subOption.disabled
+                        }));
+                    });
+                }
+                else {
+                    $tag = $('<option/>').attr({
+                        value: option.value,
+                        label: option.label || option.value,
+                        title: option.title,
+                        selected: !!option.selected,
+                        disabled: !!option.disabled
+                    });
+                }
+
+                $select.append($tag);
+            });
+
+            var allDropdownOptions = $("li:not(.multiselect-item)", this.$ul);
+            for (var i = 0; i < allDropdownOptions.length; i = i + 1) {
+                allDropdownOptions[i].remove();
+            }
+
+            var allDividersExceptFirst = $("li.divider:not(:first)", this.$ul);
+            for (var i = 0; i < allDividersExceptFirst.length; i = i + 1) {
+                allDividersExceptFirst[i].remove();
+            }
+
+            this.buildDropdownOptions();
         },
 
         /**
