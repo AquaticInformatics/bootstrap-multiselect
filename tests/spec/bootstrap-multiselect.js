@@ -913,7 +913,8 @@ describe('Bootstrap Multiselect "Dataprovider"', function() {
         $('body').append($select);
 
         $select.multiselect({
-            buttonContainer: '<div id="multiselect-container"></div>'
+            buttonContainer: '<div id="multiselect-container"></div>',
+            enableCaseInsensitiveFiltering: -1
         });
     });
 
@@ -933,7 +934,7 @@ describe('Bootstrap Multiselect "Dataprovider"', function() {
     it("Should be able to add options.", function() {
         $('#multiselect').multiselect('dataprovider', options);
         expect($('#multiselect option').length).toBe(6);
-        expect($('#multiselect-container input').length).toBe(6);
+        expect($('#multiselect-container input:not([type="text"])').length).toBe(6);
 
         expect($('#multiselect option[value="1"]').length).toBe(1);
         expect($('#multiselect option[value="1"]').prop('selected')).toBe(true);
@@ -1006,12 +1007,17 @@ describe('Bootstrap Multiselect "Dataprovider"', function() {
 
         expect($('#multiselect optgroup').length).toBe(2);
         expect($('#multiselect option').length).toBe(6);
-        expect($('#multiselect-container input').length).toBe(6);
-
+        expect($('#multiselect-container input:not([type="text"])').length).toBe(6);
         expect($('#multiselect optgroup[label="Group 1"] option').length).toBe(3);
         expect($('#multiselect optgroup[label="Group 2"] option').length).toBe(3);
     });
 
+    it('Should reset the search text', function() {
+        $('.multiselect-container input[type="text"]').val('Mayo, QC, CA');
+        $('#multiselect').multiselect('dataprovider', options);
+        expect($('.multiselect-container input[type="text"]').val()).toEqual('');
+    });
+    
     afterEach(function() {
         $('#multiselect').multiselect('destroy');
         $('#multiselect').remove();
@@ -1026,7 +1032,8 @@ describe('Bootstrap Multiselect "DataProviderOnlyReplaceOptions"', function() {
         $('body').append($select);
 
         $select.multiselect({
-            buttonContainer: '<div id="multiselect-container"></div>'
+            buttonContainer: '<div id="multiselect-container"></div>',
+            enableCaseInsensitiveFiltering: -1
         });
     });
 
@@ -1042,7 +1049,7 @@ describe('Bootstrap Multiselect "DataProviderOnlyReplaceOptions"', function() {
     it("Should be able to add options.", function() {
         $('#multiselect').multiselect('dataproviderOnlyReplaceOptions', options);
         expect($('#multiselect option').length).toBe(6);
-        expect($('#multiselect-container input').length).toBe(6);
+        expect($('#multiselect-container input:not([type="text"])').length).toBe(6);
 
         expect($('#multiselect option[value="1"]').length).toBe(1);
         expect($('#multiselect option[value="1"]').prop('selected')).toBe(true);
@@ -1109,10 +1116,17 @@ describe('Bootstrap Multiselect "DataProviderOnlyReplaceOptions"', function() {
 
         expect($('#multiselect optgroup').length).toBe(2);
         expect($('#multiselect option').length).toBe(6);
-        expect($('#multiselect-container input').length).toBe(6);
+        expect($('#multiselect-container input:not([type="text"])').length).toBe(6);
 
         expect($('#multiselect optgroup[label="Group 1"] option').length).toBe(3);
         expect($('#multiselect optgroup[label="Group 2"] option').length).toBe(3);
+    });
+
+    it('Should not reset the search text', function() {
+        var expectedSearchText = 'Search text';
+        $('.multiselect-container input[type="text"]').val(expectedSearchText);
+        $('#multiselect').multiselect('dataproviderOnlyReplaceOptions', options);
+        expect($('.multiselect-container input[type="text"]').val()).toEqual(expectedSearchText);
     });
 
     afterEach(function() {

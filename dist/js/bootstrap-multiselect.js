@@ -1436,70 +1436,7 @@
                 this.$ul.addClass('pull-right');
             }
         },
-
-        /**
-         * The provided data will be used to build the dropdown.
-         */
-        dataprovider: function(dataprovider) {
-
-            var groupCounter = 0;
-            var $select = this.$select.empty();
-
-            $.each(dataprovider, function (index, option) {
-                var $tag;
-
-                if ($.isArray(option.children)) { // create optiongroup tag
-                    groupCounter++;
-
-                    $tag = $('<optgroup/>').attr({
-                        label: option.label || 'Group ' + groupCounter,
-                        disabled: !!option.disabled
-                    });
-
-                    forEach(option.children, function(subOption) { // add children option tags
-                        var attributes = {
-                            value: subOption.value,
-                            label: subOption.label || subOption.value,
-                            title: subOption.title,
-                            selected: !!subOption.selected,
-                            disabled: !!subOption.disabled
-                        };
-
-                        //Loop through attributes object and add key-value for each attribute
-                       for (var key in subOption.attributes) {
-                            attributes['data-' + key] = subOption.attributes[key];
-                       }
-                         //Append original attributes + new data attributes to option
-                        $tag.append($('<option/>').attr(attributes));
-                    });
-                }
-                else {
-
-                    var attributes = {
-                        'value': option.value,
-                        'label': option.label || option.value,
-                        'title': option.title,
-                        'class': option.class,
-                        'selected': !!option.selected,
-                        'disabled': !!option.disabled
-                    };
-                    //Loop through attributes object and add key-value for each attribute
-                    for (var key in option.attributes) {
-                      attributes['data-' + key] = option.attributes[key];
-                    }
-                    //Append original attributes + new data attributes to option
-                    $tag = $('<option/>').attr(attributes);
-
-                    $tag.text(option.label || option.value);
-                }
-
-                $select.append($tag);
-            });
-
-            this.rebuild();
-        },
-
-        dataproviderOnlyReplaceOptions: function(dataprovider) {
+        dataproviderInternal: function(dataprovider, rebuildFunction) {
             var groupCounter = 0;
             var $select = this.$select.empty();
 
@@ -1536,18 +1473,32 @@
 
                 $select.append($tag);
             });
+            rebuildFunction.call(this);
+        },
 
-            var allDropdownOptions = $("li:not(.multiselect-item)", this.$ul);
-            for (var i = 0; i < allDropdownOptions.length; i = i + 1) {
-                allDropdownOptions[i].remove();
-            }
+        /**
+         * The provided data will be used to build the dropdown.
+         */
+        dataprovider: function(dataprovider) {
+            this.dataproviderInternal(dataprovider, this.rebuild);
+        },
 
-            var allDividersExceptFirst = $("li.divider:not(:first)", this.$ul);
-            for (var i = 0; i < allDividersExceptFirst.length; i = i + 1) {
-                allDividersExceptFirst[i].remove();
-            }
+        dataproviderOnlyReplaceOptions: function(dataprovider) {
 
-            this.buildDropdownOptions();
+            var rebuildFunction = function() {
+                var allDropdownOptions = $("li:not(.multiselect-item)", this.$ul);
+                $.each(allDropdownOptions, function(index, dropdownOption) {
+                    dropdownOption.remove();
+                });
+
+                var allDividersExceptFirst = $("li.divider:not(:first)", this.$ul);
+                $.each(allDividersExceptFirst, function(index, divider) {
+                    divider.remove();
+                });
+
+                this.buildDropdownOptions();
+            };
+            this.dataproviderInternal(dataprovider, rebuildFunction);
         },
 
         /**
