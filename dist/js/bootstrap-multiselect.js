@@ -454,7 +454,7 @@
             }, this));
 
             // Bind the change event on the dropdown elements.
-            $('li input', this.$ul).on('change', $.proxy(function(event) {
+            $('li input:not(.multiselect-search)', this.$ul).on('change', $.proxy(function(event) {
                 var $target = $(event.target);
 
                 var checked = $target.prop('checked') || false;
@@ -1186,25 +1186,21 @@
             }
         },
 
-        /**
-         * The provided data will be used to build the dropdown.
-         */
-        dataprovider: function(dataprovider) {
-            
+        dataproviderInternal: function(dataprovider, rebuildFunction) {
             var groupCounter = 0;
             var $select = this.$select.empty();
-            
+
             $.each(dataprovider, function (index, option) {
                 var $tag;
-                
+
                 if ($.isArray(option.children)) { // create optiongroup tag
                     groupCounter++;
-                    
+
                     $tag = $('<optgroup/>').attr({
                         label: option.label || 'Group ' + groupCounter,
                         disabled: !!option.disabled
                     });
-                    
+
                     forEach(option.children, function(subOption) { // add children option tags
                         $tag.append($('<option/>').attr({
                             value: subOption.value,
@@ -1224,11 +1220,35 @@
                         disabled: !!option.disabled
                     });
                 }
-                
+
                 $select.append($tag);
             });
-            
-            this.rebuild();
+            rebuildFunction.call(this);
+        },
+
+        /**
+         * The provided data will be used to build the dropdown.
+         */
+        dataprovider: function(dataprovider) {
+            this.dataproviderInternal(dataprovider, this.rebuild);
+        },
+
+        dataproviderOnlyReplaceOptions: function(dataprovider) {
+
+            var rebuildFunction = function() {
+                var allDropdownOptions = $("li:not(.multiselect-item)", this.$ul);
+                $.each(allDropdownOptions, function(index, dropdownOption) {
+                    dropdownOption.remove();
+                });
+
+                var allDividersExceptFirst = $("li.divider:not(:first)", this.$ul);
+                $.each(allDividersExceptFirst, function(index, divider) {
+                    divider.remove();
+                });
+
+                this.buildDropdownOptions();
+            };
+            this.dataproviderInternal(dataprovider, rebuildFunction);
         },
 
         /**
