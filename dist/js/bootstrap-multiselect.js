@@ -557,8 +557,7 @@
             }, this));
 
             // Bind the change event on the dropdown elements.
-            $('li:not(.multiselect-group) input', this.$ul).on('change', $.proxy(function(event) {
-//            $('li input:not(.multiselect-search)', this.$ul).on('change', $.proxy(function(event) {
+            $('li:not(.multiselect-group, .multiselect-filter) input', this.$ul).on('change', $.proxy(function(event) {
                 var $target = $(event.target);
 
                 var checked = $target.prop('checked') || false;
@@ -1452,23 +1451,40 @@
                     });
 
                     forEach(option.children, function(subOption) { // add children option tags
-                        $tag.append($('<option/>').attr({
+                        var attributes = {
                             value: subOption.value,
                             label: subOption.label || subOption.value,
                             title: subOption.title,
                             selected: !!subOption.selected,
                             disabled: !!subOption.disabled
-                        }));
+                        };
+
+                        //Loop through attributes object and add key-value for each attribute
+                        for (var key in subOption.attributes) {
+                            attributes['data-' + key] = subOption.attributes[key];
+                        }
+                        //Append original attributes + new data attributes to option
+                        $tag.append($('<option/>').attr(attributes));
                     });
                 }
                 else {
-                    $tag = $('<option/>').attr({
-                        value: option.value,
-                        label: option.label || option.value,
-                        title: option.title,
-                        selected: !!option.selected,
-                        disabled: !!option.disabled
-                    });
+
+                    var attributes = {
+                        'value': option.value,
+                        'label': option.label || option.value,
+                        'title': option.title,
+                        'class': option.class,
+                        'selected': !!option.selected,
+                        'disabled': !!option.disabled
+                    };
+                    //Loop through attributes object and add key-value for each attribute
+                    for (var key in option.attributes) {
+                        attributes['data-' + key] = option.attributes[key];
+                    }
+                    //Append original attributes + new data attributes to option
+                    $tag = $('<option/>').attr(attributes);
+
+                    $tag.text(option.label || option.value);
                 }
 
                 $select.append($tag);
