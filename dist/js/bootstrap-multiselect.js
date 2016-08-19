@@ -1504,12 +1504,12 @@
             var rebuildFunction = function() {
                 var allDropdownOptions = $("li:not(.multiselect-item)", this.$ul);
                 $.each(allDropdownOptions, function(index, dropdownOption) {
-                    dropdownOption.remove();
+                    $(dropdownOption).remove();
                 });
 
                 var allDividersExceptFirst = $("li.divider:not(:first)", this.$ul);
                 $.each(allDividersExceptFirst, function(index, divider) {
-                    divider.remove();
+                    $(divider).remove();
                 });
 
                 this.buildDropdownOptions();
