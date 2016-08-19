@@ -557,7 +557,7 @@
             }, this));
 
             // Bind the change event on the dropdown elements.
-            $('li:not(.multiselect-group) input', this.$ul).on('change', $.proxy(function(event) {
+            $('li:not(.multiselect-group, .multiselect-filter) input', this.$ul).on('change', $.proxy(function(event) {
                 var $target = $(event.target);
 
                 var checked = $target.prop('checked') || false;
@@ -1435,12 +1435,7 @@
                 this.$ul.addClass('pull-right');
             }
         },
-
-        /**
-         * The provided data will be used to build the dropdown.
-         */
-        dataprovider: function(dataprovider) {
-
+        dataproviderInternal: function(dataprovider, rebuildFunction) {
             var groupCounter = 0;
             var $select = this.$select.empty();
 
@@ -1465,10 +1460,10 @@
                         };
 
                         //Loop through attributes object and add key-value for each attribute
-                       for (var key in subOption.attributes) {
+                        for (var key in subOption.attributes) {
                             attributes['data-' + key] = subOption.attributes[key];
-                       }
-                         //Append original attributes + new data attributes to option
+                        }
+                        //Append original attributes + new data attributes to option
                         $tag.append($('<option/>').attr(attributes));
                     });
                 }
@@ -1484,7 +1479,7 @@
                     };
                     //Loop through attributes object and add key-value for each attribute
                     for (var key in option.attributes) {
-                      attributes['data-' + key] = option.attributes[key];
+                        attributes['data-' + key] = option.attributes[key];
                     }
                     //Append original attributes + new data attributes to option
                     $tag = $('<option/>').attr(attributes);
@@ -1494,8 +1489,32 @@
 
                 $select.append($tag);
             });
+            rebuildFunction.call(this);
+        },
 
-            this.rebuild();
+        /**
+         * The provided data will be used to build the dropdown.
+         */
+        dataprovider: function(dataprovider) {
+            this.dataproviderInternal(dataprovider, this.rebuild);
+        },
+
+        dataproviderOnlyReplaceOptions: function(dataprovider) {
+
+            var rebuildFunction = function() {
+                var allDropdownOptions = $("li:not(.multiselect-item)", this.$ul);
+                $.each(allDropdownOptions, function(index, dropdownOption) {
+                    $(dropdownOption).remove();
+                });
+
+                var allDividersExceptFirst = $("li.divider:not(:first)", this.$ul);
+                $.each(allDividersExceptFirst, function(index, divider) {
+                    $(divider).remove();
+                });
+
+                this.buildDropdownOptions();
+            };
+            this.dataproviderInternal(dataprovider, rebuildFunction);
         },
 
         /**
