@@ -2283,3 +2283,62 @@ describe('Knockout Binding.', function() {
         expect($testArea.next().find('button.multiselect').text().trim()).toEqual('2 selected');
     });
 });
+
+describe('Method "clearSelection" should clear selection in single mode.', function() {
+    beforeEach(function() {
+        var $select = $('<select id="multiselect"></select>');
+        $select.append('<option value="value-1">Option 1</option>');
+        $select.append('<option value="value-2">Option 2</option>');
+        $select.append('<option value="value-3">Option 3</option>');
+
+        $('body').append($select);
+
+        $select.multiselect({
+            buttonContainer: '<div id="multiselect-container"></div>'
+        });
+    });
+
+    it('Method "clearSelection" is able to clear selection.', function() {
+        $('#multiselect-container input[value="value-2"]').click();
+        expect($('#multiselect-container input:checked').length).toBe(1);
+        expect($('#multiselect option:selected').length).toBe(1);
+
+        $('#multiselect').multiselect('clearSelection');
+        expect($('#multiselect-container input:checked').length).toBe(0);
+    });
+
+    afterEach(function() {
+        $('#multiselect').multiselect('destroy');
+        $('#multiselect').remove();
+    });
+});
+describe('Method "clearSelection" should clear selection in multiple mode.', function() {
+    beforeEach(function() {
+        var $select = $('<select id="multiselect" multiple="multiple"></select>');
+        $select.append('<option value="value-1">Option 1</option>');
+        $select.append('<option value="value-2">Option 2</option>');
+        $select.append('<option value="value-3">Option 3</option>');
+
+        $('body').append($select);
+
+        $select.multiselect({
+            buttonContainer: '<div id="multiselect-container"></div>'
+        });
+    });
+
+    it('Method "clearSelection" should clear selection.', function() {
+        $('#multiselect-container input[value="value-1"]').click();
+        $('#multiselect-container input[value="value-2"]').click();
+        expect($('#multiselect-container input:checked').length).toBe(2);
+        expect($('#multiselect option:selected').length).toBe(2);
+
+        $('#multiselect').multiselect('clearSelection');
+        expect($('#multiselect-container input:checked').length).toBe(0);
+        expect($('#multiselect option:selected').length).toBe(0);
+    });
+
+    afterEach(function() {
+        $('#multiselect').multiselect('destroy');
+        $('#multiselect').remove();
+    });
+});
